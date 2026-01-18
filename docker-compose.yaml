@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  collector:
+    build: .
+    env_file: .env
+    restart: always
+    command: node updates-collector.js
+    depends_on:
+      - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - quotly
+
+  worker-1:
+    build: .
+    env_file: .env
+    environment:
+      - WORKER_INDEX=0
+    restart: always
+    command: node updates-worker.js
+    depends_on:
+      - redis
+      - collector
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - quotly
+
+  worker-2:
+    build: .
+    env_file: .env
+    environment:
+      - WORKER_INDEX=1
+    restart: always
+    command: node updates-worker.js
+    depends_on:
+      - redis
+      - collector
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - quotly
+
+  worker-3:
+    build: .
+    env_file: .env
+    environment:
+      - WORKER_INDEX=2
+    restart: always
+    command: node updates-worker.js
+    depends_on:
+      - redis
+      - collector
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - quotly
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - quotly
+
+volumes:
+  mongo-volume:
+    driver: 'local'
+
+networks:
+  quotly:
+    driver: bridge
